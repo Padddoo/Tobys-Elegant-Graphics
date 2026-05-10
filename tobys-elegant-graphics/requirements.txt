@@ -1,0 +1,39 @@
+# Core: Daten und Numerik
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Plotting Basis
+matplotlib>=3.7.0
+seaborn>=0.13.0
+
+# Interaktive und spezialisierte Grafiken
+plotly>=5.18.0
+
+# Use Case #9: Ridgeline Plot
+joypy>=0.2.6
+
+# Use Case #10: Raincloud Plot
+ptitprince>=0.2.7
+
+# Use Case #18: Mosaic Plot
+statsmodels>=0.14.0
+
+# Use Case #22: PCA / Use Case #23: t-SNE
+scikit-learn>=1.3.0
+
+# Use Case #23: UMAP
+umap-learn>=0.5.5
+
+# Use Case #26: Kalender-Heatmap
+calplot>=0.1.7
+
+# Use Case #28: Treemap
+squarify>=0.4.3
+
+# Use Case #30: Choropleth Maps (Geo)
+geopandas>=0.14.0
+folium>=0.15.0
+
+# Notebook-Umgebung (nur fuer lokale Nutzung; in Colab vorinstalliert)
+jupyter>=1.0.0
+notebook>=7.0.0
