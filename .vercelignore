@@ -1,0 +1,7 @@
+# Nur die statische App (docs/) ist deploy-relevant.
+# Alles andere vom Upload ausschließen, damit Vercels
+# Framework-Erkennung nicht anspringt (z. B. Python wegen requirements.txt).
+data/
+tools/
+*.md
+.gitignore

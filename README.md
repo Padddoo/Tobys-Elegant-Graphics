@@ -31,10 +31,10 @@ Kein Login, kein Backend, kein Build-Step: Vanilla HTML/CSS/JS + [Plotly.js](htt
 tobys-elegant-graphics/
 ├── README.md
 ├── PROJECT_PLAN.md          ← Meilensteine & Architektur-Entscheidungen
-├── requirements.txt         ← Python nur für tools/ (Datengenerierung, Vorberechnung)
+├── vercel.json              ← statisches Deployment aus /docs
 ├── data/                    ← Quell-Datensätze (CSV)
 │   └── shipping_orders_2024.csv
-├── tools/                   ← Python-Skripte: Daten generieren, PCA/LOESS vorberechnen
+├── tools/                   ← Python-Skripte + requirements.txt (Datengenerierung, Vorberechnung)
 └── docs/                    ← DIE WEB-APP (Vercel serviert aus /docs)
     ├── index.html           ← Start + Lernpfad
     ├── module.html          ← generische Modul-Seite (#01 … #30)
