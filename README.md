@@ -11,11 +11,9 @@ Jede der 30 Visualisierungen ist ein interaktives Lern-Modul mit:
 
 - 🔬 **Parameter-Labor** — Slider & Controls verändern die Grafik live, am echten Datensatz. Man *sieht*, wie Bin-Breite, Skala & Co. die Aussage verändern.
 - ⚖️ **Gut vs. Schlecht** — dieselben Daten einmal sauber, einmal irreführend dargestellt, per Klick umschaltbar.
-- 📋 **Snippet-Karte** — das Python-Rezept (matplotlib/seaborn) zum Kopieren, als Minimal- und als präsentationstaugliche Version.
 - ⚠️ **Merksatz & Fallstricke** — was die Grafik zeigt und was sie verschweigt.
-- 🧠 **Quiz** — 2–3 Fragen mit Sofort-Feedback.
 
-Dazu kommen ein **geführter Lernpfad** (Fortschritt wird im Browser gespeichert), ein **Chart-Chooser** (Entscheidungsbaum zur richtigen Grafik, in Arbeit) und ein übergreifender **Quiz-Modus** (in Arbeit).
+Dazu kommen ein **geführter Lernpfad** (Fortschritt wird im Browser gespeichert) und der **Chart-Chooser** — ein Entscheidungsbaum, der in 2–3 Fragen zur passenden Grafik führt.
 
 Kein Login, kein Backend, kein Build-Step: Vanilla HTML/CSS/JS + [Plotly.js](https://plotly.com/javascript/), gehostet auf Vercel (`vercel.json` zeigt auf `docs/`).
 
@@ -23,7 +21,6 @@ Kein Login, kein Backend, kein Build-Step: Vanilla HTML/CSS/JS + [Plotly.js](htt
 
 1. **Bei jedem neuen Datensatz innerhalb von 5 Minuten** die richtige Visualisierung wählen können.
 2. Die **Trade-offs** jeder Grafik kennen — was sie zeigt und was sie verschweigt.
-3. Eine eigene Bibliothek von **wiederverwendbaren Code-Snippets** haben.
 
 ## Repo-Struktur
 
@@ -37,12 +34,14 @@ tobys-elegant-graphics/
 ├── tools/                   ← Python-Skripte + requirements.txt (Datengenerierung, Vorberechnung)
 └── docs/                    ← DIE WEB-APP (Vercel serviert aus /docs)
     ├── index.html           ← Start + Lernpfad
+    ├── chooser.html         ← Chart-Chooser (Entscheidungsbaum)
     ├── module.html          ← generische Modul-Seite (#01 … #30)
     ├── css/style.css
     ├── js/
     │   ├── app.js           ← Fortschritt (localStorage), DOM-Helfer
     │   ├── data.js          ← CSV laden & parsen
-    │   ├── content.js       ← Texte, Snippets, Quizfragen aller Module
+    │   ├── content.js       ← Texte und Fallstricke aller Module
+    │   ├── chooser.js       ← der Entscheidungsbaum (Daten)
     │   └── labs.js          ← die Parameter-Labore (Plotly-Configs)
     └── data/                ← Kopien der CSVs für die App (fetch)
 ```

@@ -92,9 +92,7 @@
         el("p", { class: "section-hint" }, mod.goodBad.intro));
       main.append(labCard, gbCard);
 
-      renderSnippets(mod);
       renderPitfalls(mod);
-      renderQuiz(mod);
       renderFooterNav(id);
 
       // Daten laden, dann die beiden Plot-Sektionen füllen
@@ -169,33 +167,6 @@
       setMode("good");
     }
 
-    // ---- Snippet-Karte ----
-    function renderSnippets(mod) {
-      let active = "minimal";
-      const pre = el("pre", {}, mod.snippets.minimal);
-      const copyBtn = el("button", { class: "copy-btn",
-        onclick: () => TEG.copyText(mod.snippets[active], copyBtn) }, "Kopieren");
-      const tabMin = el("button", { class: "active", onclick: () => setTab("minimal") }, "Minimal");
-      const tabEle = el("button", { onclick: () => setTab("elegant") }, "Elegant");
-
-      function setTab(t) {
-        active = t;
-        tabMin.className = t === "minimal" ? "active" : "";
-        tabEle.className = t === "elegant" ? "active" : "";
-        pre.textContent = mod.snippets[t];
-      }
-
-      main.append(
-        el("section", { class: "section-card" },
-          el("h2", {}, "📋 Snippet-Karte"),
-          el("p", { class: "section-hint" },
-            "Minimal = das Alltags-Snippet zum Einprägen. Elegant = präsentationstauglich. Erwartet einen DataFrame ", el("code", {}, "df"), "."),
-          el("div", { class: "snippet-tabs" }, tabMin, tabEle),
-          el("div", { class: "code-block" }, pre, copyBtn)
-        )
-      );
-    }
-
     // ---- Merksatz & Fallstricke ----
     function renderPitfalls(mod) {
       main.append(
@@ -210,33 +181,6 @@
           )
         )
       );
-    }
-
-    // ---- Quiz ----
-    function renderQuiz(mod) {
-      const card = el("section", { class: "section-card" },
-        el("h2", {}, "🧠 Quiz"),
-        el("p", { class: "section-hint" }, "Erst überlegen, dann klicken — Feedback kommt sofort."));
-
-      mod.quiz.forEach((q, qi) => {
-        const explain = el("div", { class: "quiz-explain", style: "display:none" }, q.explain);
-        const buttons = q.options.map((opt, oi) =>
-          el("button", {
-            onclick: (e) => {
-              buttons.forEach((b) => { b.disabled = true; });
-              buttons[q.correct].classList.add("correct");
-              if (oi !== q.correct) e.currentTarget.classList.add("wrong");
-              explain.style.display = "";
-            },
-          }, opt));
-        card.append(
-          el("div", { class: "quiz-q" },
-            el("div", { class: "q-text" }, `${qi + 1}. ${q.q}`),
-            el("div", { class: "quiz-options" }, buttons),
-            explain)
-        );
-      });
-      main.append(card);
     }
 
     // ---- Abschluss & Navigation ----

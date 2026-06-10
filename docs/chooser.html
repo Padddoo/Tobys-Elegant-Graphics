@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chart-Chooser — Toby's Elegant Graphics</title>
+  <meta name="description" content="Welche Grafik passt zu meiner Frage? Der Entscheidungsbaum führt in wenigen Klicks zur passenden Visualisierung." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <main class="container">
+    <section class="module-header">
+      <h1>Chart-Chooser</h1>
+      <p class="module-question">
+        Welche Grafik passt zu meiner Frage? Beantworte 2–3 Fragen über deine Daten —
+        der Entscheidungsbaum führt dich zur passenden Visualisierung.
+      </p>
+    </section>
+    <section class="section-card" id="chooser-card"></section>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script src="js/content.js"></script>
+  <script src="js/chooser.js"></script>
+  <script>
+    TEG.renderHeader("chooser");
+    TEG.renderFooter();
+
+    const el = TEG.el;
+    const card = document.getElementById("chooser-card");
+
+    // Pfad der bisherigen Antworten: [{ nodeId, label }]
+    let trail = [];
+
+    function moduleChip(id, primary) {
+      const m = TEG_MODULES[id];
+      const num = el("span", { class: "chip-num" }, "#" + id);
+      if (!m.available) {
+        return el("span", {
+          class: "chip locked" + (primary ? " primary" : ""),
+          title: "Modul bald verfügbar",
+        }, num, m.title, " 🔒");
+      }
+      return el("a", {
+        class: "chip" + (primary ? " primary" : ""),
+        href: `module.html#${id}`,
+      }, num, m.title, primary ? " →" : null);
+    }
+
+    function renderTrail() {
+      if (!trail.length) return null;
+      return el("div", { class: "answer-trail" },
+        trail.map((t) => el("span", { class: "trail-chip" }, t.label)),
+        el("button", { class: "trail-back", onclick: back }, "← Zurück")
+      );
+    }
+
+    function back() {
+      trail.pop();
+      renderNode(trail.length ? trail[trail.length - 1].target : "start");
+    }
+
+    function restart() {
+      trail = [];
+      renderNode("start");
+    }
+
+    function choose(option) {
+      if (option.next) {
+        trail.push({ label: option.label, target: option.next });
+        renderNode(option.next);
+      } else {
+        trail.push({ label: option.label, target: null });
+        renderResult(option.result);
+      }
+    }
+
+    function renderNode(nodeId) {
+      const node = TEG_CHOOSER_TREE[nodeId];
+      card.replaceChildren();
+      card.append(
+        renderTrail() || "",
+        el("div", { class: "chooser-question" }, node.q),
+        el("div", { class: "chooser-options" },
+          node.options.map((o) => el("button", { onclick: () => choose(o) }, o.label)))
+      );
+    }
+
+    function renderResult(result) {
+      card.replaceChildren();
+      card.append(
+        renderTrail() || "",
+        el("div", { class: "chooser-question" }, "Meine Empfehlung:"),
+        el("div", { class: "result-label" }, "Erste Wahl"),
+        el("div", { class: "module-chips" },
+          result.primary.map((id) => moduleChip(id, true)))
+      );
+      if (result.also.length) {
+        card.append(
+          el("div", { class: "result-label" }, "Auch einen Blick wert"),
+          el("div", { class: "module-chips" },
+            result.also.map((id) => moduleChip(id, false)))
+        );
+      }
+      card.append(
+        el("div", { class: "result-note" }, result.note),
+        el("div", { style: "margin-top: 22px" },
+          el("button", { class: "btn btn-ghost", onclick: restart }, "↺ Von vorn beginnen"))
+      );
+    }
+
+    renderNode("start");
+  </script>
+</body>
+</html>

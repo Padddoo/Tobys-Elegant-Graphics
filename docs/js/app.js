@@ -52,10 +52,7 @@ const TEG = (() => {
         el("a", { class: "brand", href: "index.html" }, "Toby's Elegant Graphics"),
         el("nav", { class: "site-nav" },
           el("a", { href: "index.html", class: active === "path" ? "active" : "" }, "Lernpfad"),
-          el("span", { class: "nav-disabled" }, "Chart-Chooser",
-            el("span", { class: "soon-tag" }, "bald")),
-          el("span", { class: "nav-disabled" }, "Quiz",
-            el("span", { class: "soon-tag" }, "bald")),
+          el("a", { href: "chooser.html", class: active === "chooser" ? "active" : "" }, "Chart-Chooser"),
           el("a", { href: "https://github.com/Padddoo/Tobys-Elegant-Graphics",
                     target: "_blank", rel: "noopener" }, "GitHub")
         )
@@ -75,25 +72,5 @@ const TEG = (() => {
     );
   }
 
-  // ---- Copy-Button ----
-
-  async function copyText(text, btn) {
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      // Fallback für ältere Browser / file://-Kontext
-      const ta = document.createElement("textarea");
-      ta.value = text;
-      document.body.append(ta);
-      ta.select();
-      document.execCommand("copy");
-      ta.remove();
-    }
-    const old = btn.textContent;
-    btn.textContent = "Kopiert ✓";
-    btn.classList.add("copied");
-    setTimeout(() => { btn.textContent = old; btn.classList.remove("copied"); }, 1600);
-  }
-
-  return { getDone, setDone, isDone, el, renderHeader, renderFooter, copyText };
+  return { getDone, setDone, isDone, el, renderHeader, renderFooter };
 })();

@@ -16,13 +16,10 @@
   --bad: #b91c1c;
   --bad-soft: #fef2f2;
   --border: #e7e5df;
-  --code-bg: #1e1e2e;
-  --code-ink: #e4e4ef;
   --radius: 12px;
   --shadow: 0 1px 3px rgba(29, 29, 41, 0.07), 0 8px 24px rgba(29, 29, 41, 0.05);
   --font-text: "Inter", system-ui, -apple-system, sans-serif;
   --font-display: "Fraunces", Georgia, serif;
-  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
 }
 
 * { box-sizing: border-box; }
@@ -214,31 +211,6 @@ a.chip:hover { border-color: var(--accent); color: var(--accent); text-decoratio
 .goodbad-explain.is-good { background: var(--good-soft); color: #14532d; }
 .goodbad-explain.is-bad { background: var(--bad-soft); color: #7f1d1d; }
 
-/* ---------- Snippet-Karte ---------- */
-
-.snippet-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
-.snippet-tabs button {
-  padding: 6px 16px; border-radius: 99px; border: 1px solid var(--border);
-  background: var(--surface); font-family: var(--font-text); font-size: 0.85rem;
-  font-weight: 600; color: var(--ink-soft); cursor: pointer;
-}
-.snippet-tabs button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
-.code-block { position: relative; }
-.code-block pre {
-  background: var(--code-bg); color: var(--code-ink); border-radius: var(--radius);
-  padding: 20px 22px; overflow-x: auto; font-family: var(--font-mono);
-  font-size: 0.86rem; line-height: 1.6; margin: 0;
-}
-.copy-btn {
-  position: absolute; top: 12px; right: 12px;
-  background: rgba(255,255,255,0.1); color: var(--code-ink);
-  border: 1px solid rgba(255,255,255,0.2); border-radius: 7px;
-  padding: 5px 12px; font-size: 0.78rem; font-family: var(--font-text);
-  font-weight: 600; cursor: pointer; transition: all 0.15s;
-}
-.copy-btn:hover { background: rgba(255,255,255,0.2); }
-.copy-btn.copied { background: var(--good); border-color: var(--good); color: #fff; }
-
 /* ---------- Fallstricke ---------- */
 
 .pitfall-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
@@ -256,26 +228,45 @@ a.chip:hover { border-color: var(--accent); color: var(--accent); text-decoratio
   color: #312e81; margin-bottom: 20px;
 }
 
-/* ---------- Quiz ---------- */
+/* ---------- Chart-Chooser ---------- */
 
-.quiz-q { margin-bottom: 26px; }
-.quiz-q .q-text { font-weight: 600; margin-bottom: 10px; }
-.quiz-options { display: flex; flex-direction: column; gap: 8px; }
-.quiz-options button {
-  text-align: left; padding: 11px 16px; border-radius: 9px;
+.answer-trail { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.answer-trail .trail-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 13px; border-radius: 99px; font-size: 0.84rem;
+  background: var(--accent-soft); color: var(--accent); font-weight: 500;
+}
+.trail-back {
   border: 1px solid var(--border); background: var(--surface);
-  font-family: var(--font-text); font-size: 0.93rem; cursor: pointer;
+  border-radius: 99px; padding: 5px 13px; font-size: 0.84rem;
+  font-family: var(--font-text); color: var(--ink-soft); cursor: pointer;
+}
+.trail-back:hover { border-color: var(--accent); color: var(--accent); }
+
+.chooser-question { font-weight: 600; font-size: 1.15rem; margin-bottom: 16px; }
+.chooser-options { display: flex; flex-direction: column; gap: 9px; }
+.chooser-options button {
+  text-align: left; padding: 13px 18px; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--surface);
+  font-family: var(--font-text); font-size: 0.95rem; cursor: pointer;
   transition: all 0.12s;
 }
-.quiz-options button:hover:not([disabled]) { border-color: var(--accent); background: var(--accent-soft); }
-.quiz-options button.correct { border-color: var(--good); background: var(--good-soft); font-weight: 600; }
-.quiz-options button.wrong { border-color: var(--bad); background: var(--bad-soft); }
-.quiz-options button[disabled] { cursor: default; }
-.quiz-explain {
-  margin-top: 10px; padding: 11px 15px; border-radius: 8px;
-  background: var(--bg); border: 1px solid var(--border);
-  font-size: 0.9rem; color: var(--ink-soft);
+.chooser-options button:hover { border-color: var(--accent); background: var(--accent-soft); }
+
+.result-label {
+  text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.74rem;
+  font-weight: 700; color: var(--ink-soft); margin: 18px 0 8px;
 }
+.result-note {
+  margin-top: 16px; padding: 12px 16px; border-radius: 8px;
+  background: var(--accent-soft); color: #312e81; font-size: 0.92rem;
+}
+.chip.primary {
+  border-color: var(--accent); background: var(--accent-soft);
+  color: var(--accent); font-weight: 600; font-size: 0.95rem;
+  padding: 9px 17px;
+}
+a.chip.primary:hover { background: var(--accent); color: #fff; }
 
 /* ---------- Modul-Abschluss & Navigation ---------- */
 

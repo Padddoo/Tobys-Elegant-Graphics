@@ -16,8 +16,9 @@ Plan v1 folgte der README-Spec (Colab-Notebooks). Entscheidung vom 2026-06-10:
 - **Die Lernumgebung ist eine statische Web-App** (HTML/CSS/JS + Plotly.js), gehostet auf
   **Vercel** (Entscheidung 2026-06-10, ersetzt GitHub Pages) → eigene URL, automatisches
   Deployment bei jedem Push, läuft auf jedem Gerät.
-- **Python-Code wird als kopierbare Snippets gezeigt** (Nice-to-have, nicht ausführbar) —
-  das Lernziel „eigene Snippet-Bibliothek" bleibt erhalten, ohne Kernel im Browser.
+- **Gestrichen (Entscheidung 2026-06-10):** Snippet-Karten und Quiz entfallen ersatzlos —
+  der Fokus liegt auf Parameter-Laboren, Gut/Schlecht-Vergleichen und dem Chart-Chooser
+  (aus M2 vorgezogen und umgesetzt).
 - **Kein Build-Step, kein Framework**: Vanilla JS + Plotly.js per CDN. Das hält die Codebasis
   für einen Lernenden les- und wartbar und passt zum Repo-Motto „keine Setup-Dramen".
 - Colab-Notebooks sind **nicht mehr im Scope** (das Template aus M0/v1 wird entfernt).
@@ -25,25 +26,22 @@ Plan v1 folgte der README-Spec (Colab-Notebooks). Entscheidung vom 2026-06-10:
 ## 1. Was die App kann (Produktsicht)
 
 Die 30 Use Cases aus dem README bleiben der fachliche Kern. Die App verpackt sie in
-fünf Erlebnis-Bausteine:
+vier Erlebnis-Bausteine:
 
 | Baustein | Beschreibung | Lernziel aus dem README |
 |----------|--------------|------------------------|
 | **Lernpfad** | Die 5 Cluster (Fundament → Storytelling) als geführter Pfad; Fortschritt pro Modul im `localStorage` | Struktur & Motivation |
 | **Parameter-Labor** | Pro Grafik ein Live-Playground: Slider & Controls (Bins, Bandbreite, Jitter, log-Skala …) verändern die Plotly-Grafik sofort — am echten Shipping-Datensatz | „Trade-offs jeder Grafik kennen" |
 | **Chart-Chooser** | Interaktiver Entscheidungsbaum: „Wie viele Variablen? Welcher Typ? Welche Frage?" → führt zur passenden Grafik | „In 5 Min. die richtige Visualisierung wählen" |
-| **Snippet-Karten** | Pro Grafik das Python-Rezept (matplotlib/seaborn/plotly) mit Copy-Button, minimal + elegante Version | „Bibliothek wiederverwendbarer Snippets" |
-| **Fallstricke & Quiz** | Pro Grafik ein Gut/Schlecht-Vergleich (z. B. abgeschnittene Achse) + Quizfragen mit Sofort-Feedback | Kritisches Sehen |
+| **Fallstricke** | Pro Grafik ein umschaltbarer Gut/Schlecht-Vergleich (z. B. abgeschnittene Achse) + Merksatz & Fallstrick-Tabelle | Kritisches Sehen |
 
 ### Aufbau einer Use-Case-Seite (einheitlich für alle 30)
 
 1. **Die Frage** — welche analytische Frage beantwortet diese Grafik?
 2. **Parameter-Labor** — interaktive Plotly-Grafik mit 2–4 Controls
 3. **Gut vs. Schlecht** — dieselben Daten einmal sauber, einmal irreführend dargestellt, umschaltbar
-4. **Snippet-Karte** — Python-Code zum Kopieren (minimal + elegant)
-5. **Merksatz & Fallstricke** — kompakte Trade-off-Tabelle
-6. **Quiz** — 2–3 Fragen, Antwort-Feedback inline
-7. **Weiter im Pfad** — Navigation zum nächsten Modul, Fortschritts-Haken
+4. **Merksatz & Fallstricke** — kompakte Trade-off-Tabelle
+5. **Weiter im Pfad** — Navigation zum nächsten Modul, Fortschritts-Haken
 
 ## 2. Technische Architektur
 
@@ -60,14 +58,14 @@ tobys-elegant-graphics/            (Repo-Root)
 └── docs/                          ← DIE WEB-APP (Vercel serviert aus /docs, s. vercel.json)
     ├── index.html                 ← Start + Lernpfad-Übersicht
     ├── chooser.html               ← Chart-Chooser (Entscheidungsbaum)
-    ├── quiz.html                  ← Quiz-Modus über alle Module
     ├── module.html                ← generische Use-Case-Seite (rendert aus Config)
     ├── css/style.css              ← Design-System (eine Datei)
     ├── js/
     │   ├── app.js                 ← Navigation, Fortschritt (localStorage), Router (#01 …)
     │   ├── data.js                ← CSV-Laden/Parsen, abgeleitete Aggregate
+    │   ├── chooser.js             ← Entscheidungsbaum-Daten
     │   ├── labs.js                ← die 30 Parameter-Labore (Plotly-Konfigurationen)
-    │   └── content.js             ← Texte, Snippets, Quizfragen, Fallstricke (alle 30 Module)
+    │   └── content.js             ← Texte und Fallstricke (alle 30 Module)
     └── data/ → ../data            ← CSVs für fetch() erreichbar (Kopie/Symlink-Strategie in M0 klären)
 ```
 
@@ -108,8 +106,8 @@ tobys-elegant-graphics/            (Repo-Root)
 
 ### M0 — App-Durchstich (das wichtigste Arbeitspaket)
 - `docs/`-Grundgerüst: Layout, Navigation, Design-System, CSV-Loader, Fortschritts-Logik
-- **Ein komplettes Modul (#01 Histogramm)** mit allen 7 Sektionen inkl. Parameter-Labor
-  (Slider: Bin-Anzahl, log-Skala, Dichte-Normierung), Gut/Schlecht, Snippet, Quiz
+- **Ein komplettes Modul (#01 Histogramm)** mit allen Sektionen inkl. Parameter-Labor
+  (Slider: Bin-Anzahl, log-Skala, Dichte-Normierung) und Gut/Schlecht
 - Lernpfad-Startseite mit den 5 Clustern (Module verlinkt, noch als „bald verfügbar")
 - Aufräumen: Notebook-Template entfernen, README auf Web-App-Konzept aktualisieren,
   requirements.txt auf `tools/`-Bedarf reduzieren
@@ -123,8 +121,8 @@ tobys-elegant-graphics/            (Repo-Root)
 - Fortschritts-Anzeige im Lernpfad scharf schalten
 - **Ergebnis:** Cluster 1 „Brot und Butter" komplett durchspielbar
 
-### M2 — Chart-Chooser + Verteilungen & Gruppen (10 Module)
-- Chart-Chooser (Entscheidungsbaum, eigenständige Seite)
+### M2 — Verteilungen & Gruppen (10 Module)
+- Chart-Chooser: ✅ bereits umgesetzt (vorgezogen, 2026-06-10)
 - #02 Density · #04 Violin · #05 Strip · #06 Beeswarm · #07 ECDF
 - #08 Grupp. Boxplot · #09 Ridgeline · #10 Raincloud · #11 Dot+CI · #12 Bar Chart
 - **Ergebnis:** Univariate + Gruppen-Perspektive komplett, Chooser nutzbar
@@ -144,8 +142,7 @@ tobys-elegant-graphics/            (Repo-Root)
 - Bundesländer-GeoJSON + Aggregat-Daten
 - **Ergebnis: alle 30 Module live**
 
-### M6 — Quiz-Modus & Politur
-- Übergreifender Quiz-Modus („Welche Grafik passt zu dieser Frage?" über alle Module)
+### M6 — QA & Politur
 - QA: alle Module auf Mobil + Desktop durchklicken, Ladezeiten, tote Links
 - README-Galerie, Lizenzdatei
 - **Ergebnis:** veröffentlichungsreif, LinkedIn-tauglich
@@ -156,11 +153,11 @@ tobys-elegant-graphics/            (Repo-Root)
 |-------------|--------|-----------|
 | M0 | App-Gerüst + Modul #01 + Aufräumen | 1–2 |
 | M1 | 3 Module | 1 |
-| M2 | Chooser + 10 Module | 2–3 |
+| M2 | 10 Module | 2–3 |
 | M3 | 6 Module + Precompute | 2 |
 | M4 | 5 Module + Datensatz | 2 |
 | M5 | 5 Module + Geo | 2 |
-| M6 | Quiz-Modus + QA | 1 |
+| M6 | QA + Politur | 1 |
 | **Gesamt** | **App + 30 Module** | **11–13** |
 
 \* Module sind stark templatisiert (Config statt Code) — der Aufwand pro Modul sinkt nach M0 deutlich.
@@ -172,7 +169,7 @@ tobys-elegant-graphics/            (Repo-Root)
 | Vercel-Projekt-Settings kollidieren mit `vercel.json` (z. B. abweichendes Root Directory) | niedrig | `vercel.json` ist die eine Quelle der Wahrheit; Dashboard-Overrides entfernen |
 | 5.000-Zeilen-CSV (~250 KB) bei jedem Seitenaufruf | niedrig | Einmal laden, im Modul-Wechsel wiederverwenden (SPA-artiger Router); ggf. abgespecktes JSON |
 | Plotly-Lücken (Hexbin, Mosaic, Beeswarm, Kalender) | mittel | Lösungen pro Fall definiert (siehe Tabelle §2); notfalls statisches Bild + Snippet |
-| Scope-Kriechen bei 30 × 7 Sektionen Content | mittel | Content-Config erzwingt einheitlichen, begrenzten Umfang pro Modul |
+| Scope-Kriechen bei 30 Modulen Content | mittel | Content-Config erzwingt einheitlichen, begrenzten Umfang pro Modul |
 
 ## 7. Arbeitsweise
 
