@@ -34,27 +34,53 @@ const TEG_DATA = (() => {
     return rows;
   }
 
-  // Spalten-Typisierung für shipping_orders_2024.csv
-  const NUMERIC = new Set(["order_value_eur", "delivery_days"]);
+  // Nicht-numerische Spalten über alle Datensätze hinweg
+  const TEXT_COLS = new Set([
+    "order_id", "order_date", "region", "carrier", "product_category",
+    "product_id", "category", "state_id", "state_name",
+  ]);
 
   function toObjects(rows) {
     const header = rows[0];
     return rows.slice(1).map((r) => {
       const o = {};
       header.forEach((h, i) => {
-        o[h] = NUMERIC.has(h) ? Number(r[i]) : r[i];
+        o[h] = TEXT_COLS.has(h) ? r[i] : Number(r[i]);
       });
       return o;
     });
   }
 
+  const fileCache = new Map();
+
+  async function fetchCSV(path) {
+    if (fileCache.has(path)) return fileCache.get(path);
+    const res = await fetch(path);
+    if (!res.ok) throw new Error(`Datensatz nicht ladbar (HTTP ${res.status})`);
+    const data = toObjects(parseCSV(await res.text()));
+    fileCache.set(path, data);
+    return data;
+  }
+
+  async function loadJSON(path) {
+    if (fileCache.has(path)) return fileCache.get(path);
+    const res = await fetch(path);
+    if (!res.ok) throw new Error(`Daten nicht ladbar (HTTP ${res.status})`);
+    const data = await res.json();
+    fileCache.set(path, data);
+    return data;
+  }
+
   async function load() {
     if (cache) return cache;
-    const res = await fetch("data/shipping_orders_2024.csv");
-    if (!res.ok) throw new Error(`Datensatz nicht ladbar (HTTP ${res.status})`);
-    cache = toObjects(parseCSV(await res.text()));
+    cache = await fetchCSV("data/shipping_orders_2024.csv");
     return cache;
   }
+
+  const loadProducts = () => fetchCSV("data/product_metrics.csv");
+  const loadGeoOrders = () => fetchCSV("data/orders_by_bundesland.csv");
+  const loadProjections = () => loadJSON("data/projections.json");
+  const loadGeoJSON = () => loadJSON("data/bundeslaender.geo.json");
 
   // ---- kleine Statistik-Helfer für die Labore ----
 
@@ -72,5 +98,5 @@ const TEG_DATA = (() => {
     return m;
   }
 
-  return { load, column, groupBy };
+  return { load, loadProducts, loadGeoOrders, loadProjections, loadGeoJSON, column, groupBy };
 })();

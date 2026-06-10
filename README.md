@@ -59,15 +59,15 @@ Kein npm, kein Build — Dateien ändern, Browser neu laden.
 
 ## Die 30 Module
 
-Status: ✅ verfügbar · 🔒 in Arbeit (Reihenfolge laut [PROJECT_PLAN.md](PROJECT_PLAN.md))
+**Alle 30 Module sind verfügbar** — jedes mit Parameter-Labor, Gut/Schlecht-Vergleich und Fallstrick-Tabelle.
 
 ### Cluster 1 · Fundament
-| # | Grafik | Frage | |
-|---|--------|-------|---|
-| 01 | Histogramm | Wie ist eine Variable verteilt? | ✅ |
-| 03 | Boxplot | Median, Quartile, Ausreißer auf einen Blick | ✅ |
-| 13 | Scatter Plot | Wie hängen zwei Variablen zusammen? | ✅ |
-| 24 | Line Chart | Wie entwickelt sich eine Größe über Zeit? | ✅ |
+| # | Grafik | Frage |
+|---|--------|-------|
+| 01 | Histogramm | Wie ist eine Variable verteilt? |
+| 03 | Boxplot | Median, Quartile, Ausreißer auf einen Blick |
+| 13 | Scatter Plot | Wie hängen zwei Variablen zusammen? |
+| 24 | Line Chart | Wie entwickelt sich eine Größe über Zeit? |
 
 ### Cluster 2 · Verteilungen & Gruppen
 | # | Grafik | Frage |
@@ -128,7 +128,13 @@ rechtsschiefe Bestellwerte (≈ log-normal), unterschiedliche Carrier-Performanc
 | `order_value_eur` | numerisch | Bestellwert in EUR |
 | `delivery_days` | numerisch | Lieferzeit in Tagen |
 
-Weitere Datensätze (hochdimensional für Cluster 4, Geo-Aggregat für #30) folgen laut Plan.
+### `product_metrics.csv`
+
+500 simulierte Produkte mit 9 numerischen Features für die hochdimensionalen Module (#19–#23). Eingebaute Struktur: ein Logistik-Block (Gewicht ↔ Volumen ↔ Versandkosten, r ≈ 0,95), ein Preis-Block (Preis ↔ Marge/Absatz, negativ) und 5 Kategorie-Cluster, die PCA/t-SNE/UMAP finden können. Erzeugt von `tools/generate_product_metrics.py`; Projektionen vorberechnet via `tools/precompute.py` → `docs/data/projections.json`.
+
+### Geo-Daten (#30)
+
+`docs/data/orders_by_bundesland.csv` verteilt die 5 Lieferregionen bevölkerungsproportional auf die 16 Bundesländer (`tools/generate_geo_data.py`). Das GeoJSON stammt aus [deutschlandGeoJSON](https://github.com/isellsoap/deutschlandGeoJSON) (© GeoBasis-DE / BKG, dl-de/by-2-0) und ist eingecheckt.
 
 ## Lizenz
 

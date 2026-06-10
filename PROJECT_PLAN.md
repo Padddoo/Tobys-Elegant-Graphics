@@ -104,6 +104,9 @@ tobys-elegant-graphics/            (Repo-Root)
 
 ## 4. Meilensteine
 
+> **Stand 2026-06-10:** M0–M5 sind umgesetzt — alle 30 Module live, inkl. Produkt-Datensatz,
+> vorberechneter Projektionen und Geo-Daten. Offen ist M6 (QA & Politur).
+
 ### M0 — App-Durchstich (das wichtigste Arbeitspaket)
 - `docs/`-Grundgerüst: Layout, Navigation, Design-System, CSV-Loader, Fortschritts-Logik
 - **Ein komplettes Modul (#01 Histogramm)** mit allen Sektionen inkl. Parameter-Labor

@@ -1,0 +1,17 @@
+state_id,state_name,region,population_mio,orders,revenue_eur,orders_per_100k
+DE-SH,Schleswig-Holstein,Nord,2.9,179,13028.57,6.2
+DE-HH,Hamburg,Nord,1.9,102,7422.07,5.4
+DE-HB,Bremen,Nord,0.7,45,3280.86,6.4
+DE-NI,Niedersachsen,Nord,8.0,524,38158.6,6.5
+DE-MV,Mecklenburg-Vorpommern,Nord,1.6,77,5614.65,4.8
+DE-BE,Berlin,Ost,3.7,185,12237.84,5.0
+DE-BB,Brandenburg,Ost,2.5,146,9628.29,5.8
+DE-SN,Sachsen,Ost,4.0,223,14729.78,5.6
+DE-ST,Sachsen-Anhalt,Ost,2.2,126,8351.89,5.7
+DE-TH,Thüringen,Ost,2.1,111,7304.46,5.3
+DE-NW,Nordrhein-Westfalen,West,17.9,924,63906.52,5.2
+DE-RP,Rheinland-Pfalz,West,4.1,210,14501.1,5.1
+DE-SL,Saarland,West,1.0,48,3303.28,4.8
+DE-BY,Bayern,Sued,13.2,627,42729.17,4.8
+DE-BW,Baden-Württemberg,Sued,11.1,496,33800.99,4.5
+DE-HE,Hessen,Zentral,6.3,978,68764.06,15.5

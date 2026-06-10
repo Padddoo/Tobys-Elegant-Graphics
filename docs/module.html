@@ -95,13 +95,15 @@
       renderPitfalls(mod);
       renderFooterNav(id);
 
-      // Daten laden, dann die beiden Plot-Sektionen füllen
-      TEG_DATA.load().then((rows) => {
-        buildLab(labCard, lab, rows);
-        buildGoodBad(gbCard, lab, mod, rows);
-      }).catch((err) => {
-        labCard.append(el("p", {}, `⚠️ ${err.message} — läuft die Seite über einen Webserver (nicht file://)?`));
-      });
+      // Daten laden (Basis-Datensatz + ggf. modulspezifische Zusatzdaten),
+      // dann die beiden Plot-Sektionen füllen
+      Promise.all([TEG_DATA.load(), lab.prepare ? lab.prepare() : null])
+        .then(([rows]) => {
+          buildLab(labCard, lab, rows);
+          buildGoodBad(gbCard, lab, mod, rows);
+        }).catch((err) => {
+          labCard.append(el("p", {}, `⚠️ ${err.message} — läuft die Seite über einen Webserver (nicht file://)?`));
+        });
     }
 
     // ---- Parameter-Labor ----
