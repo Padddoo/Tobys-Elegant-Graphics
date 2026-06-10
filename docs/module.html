@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modul — Toby's Elegant Graphics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <main class="container" id="main"></main>
+
+  <script src="js/app.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/content.js"></script>
+  <script src="js/labs.js"></script>
+  <script>
+    TEG.renderHeader();
+    TEG.renderFooter();
+
+    const PLOT_CONFIG = { responsive: true, displayModeBar: false, locale: "de" };
+    const el = TEG.el;
+    const main = document.getElementById("main");
+
+    function currentId() {
+      const id = (location.hash || "").replace("#", "");
+      return TEG_MODULES[id] ? id : null;
+    }
+
+    function render() {
+      main.replaceChildren();
+      const id = currentId();
+      if (!id) {
+        main.append(
+          el("section", { class: "module-header" },
+            el("h1", {}, "Modul nicht gefunden"),
+            el("p", {}, "Zurück zum ", el("a", { href: "index.html" }, "Lernpfad"), ".")
+          )
+        );
+        return;
+      }
+      const mod = TEG_MODULES[id];
+      document.title = `#${id} ${mod.title} — Toby's Elegant Graphics`;
+
+      if (!mod.available) {
+        main.append(
+          el("section", { class: "module-header" },
+            el("div", { class: "breadcrumb" },
+              el("a", { href: "index.html" }, "Lernpfad"),
+              el("span", { class: "sep" }, "›"), `#${id}`),
+            el("h1", {}, `${mod.title} — bald verfügbar`),
+            el("p", { class: "module-question" }, mod.question),
+            el("p", {}, "Dieses Modul ist noch in Arbeit. Schau dir solange das ",
+              el("a", { href: "module.html#01" }, "Histogramm-Modul"), " an.")
+          )
+        );
+        return;
+      }
+
+      renderModule(id, mod);
+    }
+
+    function renderModule(id, mod) {
+      const cluster = TEG_CLUSTERS.find((c) => c.modules.includes(id));
+
+      // ---- Kopf: Frage + Wann (nicht) nutzen ----
+      main.append(
+        el("section", { class: "module-header" },
+          el("div", { class: "breadcrumb" },
+            el("a", { href: "index.html" }, "Lernpfad"),
+            el("span", { class: "sep" }, "›"),
+            `Cluster ${cluster.num} · ${cluster.name}`,
+            el("span", { class: "sep" }, "›"), `#${id}`),
+          el("h1", {}, mod.title),
+          el("p", { class: "module-question" }, mod.question),
+          el("div", { class: "use-when" },
+            el("div", { class: "uw uw-yes" }, el("strong", {}, "Wann nutzen"), mod.useWhen),
+            el("div", { class: "uw uw-no" }, el("strong", {}, "Wann nicht"), mod.useNot)
+          )
+        )
+      );
+
+      // ---- Sektionen (brauchen z. T. Daten) ----
+      const lab = TEG_LABS[id];
+      const labCard = el("section", { class: "section-card" },
+        el("h2", {}, "🔬 Parameter-Labor"),
+        el("p", { class: "section-hint" }, mod.labIntro));
+      const gbCard = el("section", { class: "section-card" },
+        el("h2", {}, "⚖️ Gut vs. Schlecht"),
+        el("p", { class: "section-hint" }, mod.goodBad.intro));
+      main.append(labCard, gbCard);
+
+      renderSnippets(mod);
+      renderPitfalls(mod);
+      renderQuiz(mod);
+      renderFooterNav(id);
+
+      // Daten laden, dann die beiden Plot-Sektionen füllen
+      TEG_DATA.load().then((rows) => {
+        buildLab(labCard, lab, rows);
+        buildGoodBad(gbCard, lab, mod, rows);
+      }).catch((err) => {
+        labCard.append(el("p", {}, `⚠️ ${err.message} — läuft die Seite über einen Webserver (nicht file://)?`));
+      });
+    }
+
+    // ---- Parameter-Labor ----
+    function buildLab(card, lab, rows) {
+      const values = {};
+      const controlsWrap = el("div", { class: "lab-controls" });
+      const plotDiv = el("div", { class: "plot-area" });
+      const insight = el("div", { class: "lab-insight" });
+
+      function update() {
+        const { traces, layout } = lab.render(rows, values);
+        Plotly.react(plotDiv, traces, layout, PLOT_CONFIG);
+        if (lab.insight) insight.textContent = lab.insight(values);
+      }
+
+      lab.controls.forEach((c) => {
+        values[c.id] = c.default;
+        if (c.type === "select") {
+          const sel = el("select", { onchange: () => { values[c.id] = sel.value; update(); } },
+            c.options.map((o) => el("option", { value: o.value }, o.label)));
+          sel.value = c.default;
+          controlsWrap.append(el("div", { class: "lab-control" }, el("label", {}, c.label), sel));
+        } else if (c.type === "range") {
+          const badge = el("span", { class: "value-badge" }, String(c.default));
+          const input = el("input", { type: "range", min: c.min, max: c.max, step: c.step, value: c.default,
+            oninput: () => { values[c.id] = Number(input.value); badge.textContent = input.value; update(); } });
+          controlsWrap.append(el("div", { class: "lab-control" },
+            el("label", {}, c.label, " ", badge), input));
+        } else if (c.type === "checkbox") {
+          const cbId = `cb-${c.id}`;
+          const input = el("input", { type: "checkbox", id: cbId,
+            onchange: () => { values[c.id] = input.checked; update(); } });
+          input.checked = c.default;
+          controlsWrap.append(el("div", { class: "lab-control checkbox" },
+            input, el("label", { for: cbId }, c.label)));
+        }
+      });
+
+      card.append(controlsWrap, plotDiv, insight);
+      update();
+    }
+
+    // ---- Gut vs. Schlecht ----
+    function buildGoodBad(card, lab, mod, rows) {
+      const gb = mod.goodBad;
+      let mode = "good";
+      const goodBtn = el("button", { onclick: () => setMode("good") }, "✓ " + gb.goodLabel);
+      const badBtn = el("button", { onclick: () => setMode("bad") }, "✗ " + gb.badLabel);
+      const plotDiv = el("div", { class: "plot-area" });
+      const explain = el("div", { class: "goodbad-explain" });
+
+      function setMode(m) {
+        mode = m;
+        goodBtn.className = m === "good" ? "active-good" : "";
+        badBtn.className = m === "bad" ? "active-bad" : "";
+        explain.className = "goodbad-explain " + (m === "good" ? "is-good" : "is-bad");
+        explain.textContent = m === "good" ? gb.goodExplain : gb.badExplain;
+        const { traces, layout } = lab.goodBad(rows, m);
+        Plotly.react(plotDiv, traces, layout, PLOT_CONFIG);
+      }
+
+      card.append(el("div", { class: "goodbad-toggle" }, goodBtn, badBtn), plotDiv, explain);
+      setMode("good");
+    }
+
+    // ---- Snippet-Karte ----
+    function renderSnippets(mod) {
+      let active = "minimal";
+      const pre = el("pre", {}, mod.snippets.minimal);
+      const copyBtn = el("button", { class: "copy-btn",
+        onclick: () => TEG.copyText(mod.snippets[active], copyBtn) }, "Kopieren");
+      const tabMin = el("button", { class: "active", onclick: () => setTab("minimal") }, "Minimal");
+      const tabEle = el("button", { onclick: () => setTab("elegant") }, "Elegant");
+
+      function setTab(t) {
+        active = t;
+        tabMin.className = t === "minimal" ? "active" : "";
+        tabEle.className = t === "elegant" ? "active" : "";
+        pre.textContent = mod.snippets[t];
+      }
+
+      main.append(
+        el("section", { class: "section-card" },
+          el("h2", {}, "📋 Snippet-Karte"),
+          el("p", { class: "section-hint" },
+            "Minimal = das Alltags-Snippet zum Einprägen. Elegant = präsentationstauglich. Erwartet einen DataFrame ", el("code", {}, "df"), "."),
+          el("div", { class: "snippet-tabs" }, tabMin, tabEle),
+          el("div", { class: "code-block" }, pre, copyBtn)
+        )
+      );
+    }
+
+    // ---- Merksatz & Fallstricke ----
+    function renderPitfalls(mod) {
+      main.append(
+        el("section", { class: "section-card" },
+          el("h2", {}, "⚠️ Merksatz & Fallstricke"),
+          el("div", { class: "merksatz" }, "„" + mod.merksatz + "“"),
+          el("table", { class: "pitfall-table" },
+            el("thead", {}, el("tr", {},
+              el("th", {}, "Fallstrick"), el("th", {}, "Warum es schiefgeht"), el("th", {}, "Gegenmittel"))),
+            el("tbody", {}, mod.pitfalls.map((p) =>
+              el("tr", {}, el("td", {}, el("strong", {}, p[0])), el("td", {}, p[1]), el("td", {}, p[2]))))
+          )
+        )
+      );
+    }
+
+    // ---- Quiz ----
+    function renderQuiz(mod) {
+      const card = el("section", { class: "section-card" },
+        el("h2", {}, "🧠 Quiz"),
+        el("p", { class: "section-hint" }, "Erst überlegen, dann klicken — Feedback kommt sofort."));
+
+      mod.quiz.forEach((q, qi) => {
+        const explain = el("div", { class: "quiz-explain", style: "display:none" }, q.explain);
+        const buttons = q.options.map((opt, oi) =>
+          el("button", {
+            onclick: (e) => {
+              buttons.forEach((b) => { b.disabled = true; });
+              buttons[q.correct].classList.add("correct");
+              if (oi !== q.correct) e.currentTarget.classList.add("wrong");
+              explain.style.display = "";
+            },
+          }, opt));
+        card.append(
+          el("div", { class: "quiz-q" },
+            el("div", { class: "q-text" }, `${qi + 1}. ${q.q}`),
+            el("div", { class: "quiz-options" }, buttons),
+            explain)
+        );
+      });
+      main.append(card);
+    }
+
+    // ---- Abschluss & Navigation ----
+    function renderFooterNav(id) {
+      const idx = TEG_PATH_ORDER.indexOf(id);
+      const prevId = TEG_PATH_ORDER[idx - 1];
+      const nextId = TEG_PATH_ORDER[idx + 1];
+
+      const doneBtn = el("button", { class: "done-btn", onclick: () => {
+        const nowDone = !TEG.isDone(id);
+        TEG.setDone(id, nowDone);
+        syncDoneBtn();
+      } });
+      function syncDoneBtn() {
+        const d = TEG.isDone(id);
+        doneBtn.textContent = d ? "✓ Modul abgeschlossen" : "Modul als erledigt markieren";
+        doneBtn.classList.toggle("is-done", d);
+      }
+      syncDoneBtn();
+
+      function navLink(targetId, labelPrefix, arrow) {
+        if (!targetId) return el("span", {});
+        const m = TEG_MODULES[targetId];
+        if (!m.available) {
+          return el("span", { class: "btn btn-ghost disabled" },
+            `${arrow === "←" ? "← " : ""}#${targetId} ${m.title} (bald)${arrow === "→" ? " →" : ""}`);
+        }
+        return el("a", { class: "btn btn-ghost", href: `module.html#${targetId}` },
+          `${arrow === "←" ? "← " : ""}${labelPrefix} #${targetId} ${m.title}${arrow === "→" ? " →" : ""}`);
+      }
+
+      main.append(
+        el("div", { class: "module-footer-nav" },
+          navLink(prevId, "", "←"),
+          doneBtn,
+          navLink(nextId, "", "→"))
+      );
+    }
+
+    window.addEventListener("hashchange", () => { render(); window.scrollTo(0, 0); });
+    render();
+  </script>
+</body>
+</html>

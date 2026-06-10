@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toby's Elegant Graphics — Datenvisualisierung lernen</title>
+  <meta name="description" content="Interaktive Lernumgebung: 30 Visualisierungs-Patterns für Datenanalyse zum Anfassen — mit Parameter-Laboren, Quiz und Python-Snippets." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <main class="container">
+    <section class="hero">
+      <div class="kicker">Graphische Darstellung von Daten</div>
+      <h1>30 Grafiken, die du<br />anfassen kannst.</h1>
+      <p class="lead">
+        Jede Visualisierung als interaktives Modul: Verstelle Parameter an echten Daten,
+        erkenne irreführende Darstellungen, nimm das Python-Snippet mit. Kein Setup, kein Login —
+        einfach loslegen.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="module.html#01">Mit dem Histogramm starten →</a>
+        <span class="btn btn-ghost disabled">Chart-Chooser (bald)</span>
+      </div>
+    </section>
+
+    <section>
+      <h2>Dein Lernpfad</h2>
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Fortschritt</span>
+          <span id="progress-text">0 / 30 Modulen</span>
+        </div>
+        <div class="progress-bar"><div id="progress-fill" style="width: 0%"></div></div>
+      </div>
+      <div id="clusters"></div>
+    </section>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script src="js/content.js"></script>
+  <script>
+    TEG.renderHeader("path");
+    TEG.renderFooter();
+
+    const done = TEG.getDone();
+    const total = TEG_PATH_ORDER.length;
+    const doneCount = TEG_PATH_ORDER.filter((id) => done.has(id)).length;
+    document.getElementById("progress-text").textContent = `${doneCount} / ${total} Modulen`;
+    document.getElementById("progress-fill").style.width = `${(doneCount / total) * 100}%`;
+
+    const wrap = document.getElementById("clusters");
+    TEG_CLUSTERS.forEach((cluster) => {
+      const chips = cluster.modules.map((id) => {
+        const m = TEG_MODULES[id];
+        const isDone = done.has(id);
+        if (!m.available) {
+          return TEG.el("span", { class: "chip locked", title: "Bald verfügbar" },
+            TEG.el("span", { class: "chip-num" }, "#" + id), m.title, " 🔒");
+        }
+        return TEG.el("a", { class: "chip" + (isDone ? " done" : ""), href: `module.html#${id}` },
+          TEG.el("span", { class: "chip-num" }, "#" + id), m.title,
+          isDone ? TEG.el("span", { class: "chip-check" }, "✓") : null);
+      });
+      wrap.append(
+        TEG.el("div", { class: "cluster-card" },
+          TEG.el("h3", {},
+            TEG.el("span", { class: "cluster-num" }, String(cluster.num)),
+            cluster.name),
+          TEG.el("p", { class: "cluster-desc" }, cluster.desc),
+          TEG.el("div", { class: "module-chips" }, chips)
+        )
+      );
+    });
+  </script>
+</body>
+</html>

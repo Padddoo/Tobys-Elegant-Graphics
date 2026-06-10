@@ -1,93 +1,100 @@
 # Toby's Elegant Graphics
 
-> Ein Werkzeugkasten von 30 Visualisierungs-Patterns für Datenanalyse, EDA und Storytelling — jeder Use Case als eigenes Colab-Notebook mit echtem Beispiel-Datensatz.
+> Eine interaktive Lernumgebung zum Thema **„Graphische Darstellung von Daten"** —
+> 30 Visualisierungs-Patterns zum Anfassen, direkt im Browser.
+
+**🌐 Live:** [padddoo.github.io/Tobys-Elegant-Graphics](https://padddoo.github.io/Tobys-Elegant-Graphics/) *(GitHub Pages: Settings → Pages → Branch `main`, Ordner `/docs`)*
 
 ## Was ist das?
 
-Dieses Repository ist ein begleitendes Lern- und Nachschlagewerk zu den **30 Elegant Graphics for Data Analysis**. Für jede Visualisierung gibt es:
+Jede der 30 Visualisierungen ist ein interaktives Lern-Modul mit:
 
-- ein **Colab-Notebook** mit kommentiertem Python-Code
-- einen **realistischen Beispiel-Datensatz** im `/data/`-Ordner
-- ein **gerendertes Beispiel-Bild** in `/images/`
-- eine kurze **README-Sektion**, die erklärt: Wann nutzen? Was zeigt es? Wo sind die Fallstricke?
+- 🔬 **Parameter-Labor** — Slider & Controls verändern die Grafik live, am echten Datensatz. Man *sieht*, wie Bin-Breite, Skala & Co. die Aussage verändern.
+- ⚖️ **Gut vs. Schlecht** — dieselben Daten einmal sauber, einmal irreführend dargestellt, per Klick umschaltbar.
+- 📋 **Snippet-Karte** — das Python-Rezept (matplotlib/seaborn) zum Kopieren, als Minimal- und als präsentationstaugliche Version.
+- ⚠️ **Merksatz & Fallstricke** — was die Grafik zeigt und was sie verschweigt.
+- 🧠 **Quiz** — 2–3 Fragen mit Sofort-Feedback.
 
-Das Repo ist bewusst pragmatisch gehalten — keine Frameworks, keine Setup-Dramen. Jedes Notebook läuft eigenständig in Google Colab, kein lokales Setup nötig.
+Dazu kommen ein **geführter Lernpfad** (Fortschritt wird im Browser gespeichert), ein **Chart-Chooser** (Entscheidungsbaum zur richtigen Grafik, in Arbeit) und ein übergreifender **Quiz-Modus** (in Arbeit).
+
+Kein Login, kein Backend, kein Build-Step: Vanilla HTML/CSS/JS + [Plotly.js](https://plotly.com/javascript/), gehostet auf GitHub Pages.
+
+## Lernziele
+
+1. **Bei jedem neuen Datensatz innerhalb von 5 Minuten** die richtige Visualisierung wählen können.
+2. Die **Trade-offs** jeder Grafik kennen — was sie zeigt und was sie verschweigt.
+3. Eine eigene Bibliothek von **wiederverwendbaren Code-Snippets** haben.
 
 ## Repo-Struktur
 
 ```
 tobys-elegant-graphics/
-├── README.md                          ← Diese Datei
-├── requirements.txt                   ← Python-Pakete für lokale Nutzung
-├── .gitignore
-├── data/                              ← Beispiel-Datensätze (CSV)
-│   └── shipping_orders_2024.csv      ← Mittelständischer Versandbetrieb
-├── notebooks/                         ← Ein Colab-Notebook pro Use Case
-│   ├── 01_histogramm.ipynb
-│   ├── 03_boxplot.ipynb
-│   └── ...
-└── images/                            ← Gerenderte Plots als PNG
-    └── ...
+├── README.md
+├── PROJECT_PLAN.md          ← Meilensteine & Architektur-Entscheidungen
+├── requirements.txt         ← Python nur für tools/ (Datengenerierung, Vorberechnung)
+├── data/                    ← Quell-Datensätze (CSV)
+│   └── shipping_orders_2024.csv
+├── tools/                   ← Python-Skripte: Daten generieren, PCA/LOESS vorberechnen
+└── docs/                    ← DIE WEB-APP (GitHub Pages serviert aus /docs)
+    ├── index.html           ← Start + Lernpfad
+    ├── module.html          ← generische Modul-Seite (#01 … #30)
+    ├── css/style.css
+    ├── js/
+    │   ├── app.js           ← Fortschritt (localStorage), DOM-Helfer
+    │   ├── data.js          ← CSV laden & parsen
+    │   ├── content.js       ← Texte, Snippets, Quizfragen aller Module
+    │   └── labs.js          ← die Parameter-Labore (Plotly-Configs)
+    └── data/                ← Kopien der CSVs für die App (fetch)
 ```
 
-## Lernziel
-
-Drei Dinge, die ich nach Durcharbeiten dieses Repos können möchte:
-
-1. **Bei jedem neuen Datensatz innerhalb von 5 Minuten** die richtige Visualisierung wählen können.
-2. Die **Trade-offs** jeder Grafik kennen — was sie zeigt und was sie verschweigt.
-3. Eine eigene Bibliothek von **wiederverwendbaren Code-Snippets** haben, die ich in Projekten copy-paste-anpassen kann.
-
-## Quickstart
-
-### Variante A: Google Colab (empfohlen)
-
-1. Notebook in `/notebooks/` öffnen → Button **"Open in Colab"** klicken
-2. Erste Zelle ausführen — sie lädt den Datensatz automatisch von GitHub
-3. Durcharbeiten, eigene Varianten ausprobieren
-
-### Variante B: Lokal mit Python
+## Lokal entwickeln
 
 ```bash
-git clone https://github.com/<dein-username>/tobys-elegant-graphics.git
-cd tobys-elegant-graphics
-pip install -r requirements.txt
-jupyter notebook
+git clone https://github.com/Padddoo/Tobys-Elegant-Graphics.git
+cd Tobys-Elegant-Graphics/docs
+python3 -m http.server 8000
+# → http://localhost:8000
 ```
 
-## Die 30 Use Cases — Übersicht
+Kein npm, kein Build — Dateien ändern, Browser neu laden.
 
-### A. Verteilung einer Variable
+## Die 30 Module
+
+Status: ✅ verfügbar · 🔒 in Arbeit (Reihenfolge laut [PROJECT_PLAN.md](PROJECT_PLAN.md))
+
+### Cluster 1 · Fundament
+| # | Grafik | Frage | |
+|---|--------|-------|---|
+| 01 | Histogramm | Wie ist eine Variable verteilt? | ✅ |
+| 03 | Boxplot | Median, Quartile, Ausreißer auf einen Blick | 🔒 |
+| 13 | Scatter Plot | Wie hängen zwei Variablen zusammen? | 🔒 |
+| 24 | Line Chart | Wie entwickelt sich eine Größe über Zeit? | 🔒 |
+
+### Cluster 2 · Verteilungen & Gruppen
 | # | Grafik | Frage |
 |---|--------|-------|
-| 1 | Histogramm | Wie ist eine Variable verteilt? |
-| 2 | Density Plot (KDE) | Wie sieht die geglättete Verteilung aus? |
-| 3 | Boxplot | Median, Quartile, Ausreißer auf einen Blick |
-| 4 | Violin Plot | Wie unterscheidet sich die Form pro Gruppe? |
-| 5 | Strip / Jitter Plot | Wie streuen einzelne Punkte? |
-| 6 | Beeswarm Plot | Wie verteilt sich jede Beobachtung? |
-| 7 | ECDF Plot | Welcher Anteil liegt unter Wert x? |
-
-### B. Gruppen vergleichen
-| # | Grafik | Frage |
-|---|--------|-------|
-| 8 | Gruppierter Boxplot | Wie unterscheiden sich Gruppen statistisch? |
-| 9 | Ridgeline Plot | Wie verändert sich die Verteilung über Gruppen? |
+| 02 | Density Plot (KDE) | Wie sieht die geglättete Verteilung aus? |
+| 04 | Violin Plot | Wie unterscheidet sich die Form pro Gruppe? |
+| 05 | Strip / Jitter Plot | Wie streuen einzelne Punkte? |
+| 06 | Beeswarm Plot | Wie verteilt sich jede Beobachtung? |
+| 07 | ECDF Plot | Welcher Anteil liegt unter Wert x? |
+| 08 | Gruppierter Boxplot | Wie unterscheiden sich Gruppen statistisch? |
+| 09 | Ridgeline Plot | Wie verändert sich die Verteilung über Gruppen? |
 | 10 | Raincloud Plot | Form + Statistik + Rohdaten zugleich |
 | 11 | Dot Plot mit CI | Wie unterscheiden sich Gruppen-Mittelwerte? |
 | 12 | Bar Chart (sortiert) | Wie groß ist Wert X pro Kategorie? |
 
-### C. Beziehung zwischen zwei Variablen
+### Cluster 3 · Beziehungen
 | # | Grafik | Frage |
 |---|--------|-------|
-| 13 | Scatter Plot | Wie hängen zwei Variablen zusammen? |
-| 14 | Scatter + LOESS/Reg | Welcher Trend liegt im Streudiagramm? |
+| 14 | Scatter + LOESS | Welcher Trend liegt im Streudiagramm? |
 | 15 | Hexbin Plot | Wo häufen sich Punkte bei großen Datenmengen? |
 | 16 | 2D Density / Contour | Wie liegt die gemeinsame Dichte? |
 | 17 | Bubble Chart | 3 Variablen: x, y, Größe |
 | 18 | Mosaic Plot | Wie hängen zwei kategoriale Variablen zusammen? |
+| 29 | Sankey / Alluvial | Wie fließen Größen zwischen Kategorien? |
 
-### D. Viele Variablen / Hochdimensional
+### Cluster 4 · Hochdimensional
 | # | Grafik | Frage |
 |---|--------|-------|
 | 19 | Korrelations-Heatmap | Was korreliert mit was? |
@@ -96,61 +103,33 @@ jupyter notebook
 | 22 | PCA Scatter / Biplot | Wie strukturieren sich Hochdim-Daten? |
 | 23 | t-SNE / UMAP Plot | Nichtlineare Cluster |
 
-### E. Zeitreihen
+### Cluster 5 · Storytelling
 | # | Grafik | Frage |
 |---|--------|-------|
-| 24 | Line Chart | Wie entwickelt sich eine Größe über Zeit? |
-| 25 | Small Multiples / Faceted | Trend pro Gruppe |
+| 25 | Small Multiples | Trend pro Gruppe |
 | 26 | Heatmap-Kalender | Welche Tage/Wochen sind hoch/niedrig? |
-
-### F. Anteile & Komposition
-| # | Grafik | Frage |
-|---|--------|-------|
 | 27 | Stacked Bar (100%) | Wie verteilen sich Anteile pro Gruppe? |
 | 28 | Treemap | Wie groß sind verschachtelte Anteile? |
-
-### G. Fluss & Spezial
-| # | Grafik | Frage |
-|---|--------|-------|
-| 29 | Sankey / Alluvial | Wie fließen Größen zwischen Kategorien? |
 | 30 | Choropleth Map | Wie verteilt sich ein Wert geografisch? |
 
 ## Datensätze
 
 ### `shipping_orders_2024.csv`
 
-5.000 simulierte Bestellungen eines mittelständischen Versenders im Jahr 2024. Bewusst realistisch konstruiert: rechtsschiefe Verteilung von Bestellwerten, unterschiedliche Performance-Level pro Versanddienstleister, Saisonalität im Dezember, ca. 1,5% Ausreißer.
+5.000 simulierte Bestellungen eines mittelständischen Versenders (2024). Bewusst realistisch:
+rechtsschiefe Bestellwerte (≈ log-normal), unterschiedliche Carrier-Performance, Dezember-Saisonalität, ~1,5 % Ausreißer.
 
-**Spalten:**
 | Spalte | Typ | Beschreibung |
 |--------|-----|--------------|
 | `order_id` | string | Eindeutige Bestellnummer |
 | `order_date` | datetime | Bestelldatum |
-| `region` | kategorisch | Lieferregion (Nord, Sued, Ost, West, Zentral) |
-| `carrier` | kategorisch | Versanddienstleister (DHL, Hermes, DPD, GLS, UPS) |
-| `product_category` | kategorisch | Produktkategorie (5 Werte) |
+| `region` | kategorisch | Nord, Sued, Ost, West, Zentral |
+| `carrier` | kategorisch | DHL, Hermes, DPD, GLS, UPS |
+| `product_category` | kategorisch | Electronics, Apparel, Home, Books, Food |
 | `order_value_eur` | numerisch | Bestellwert in EUR |
-| `delivery_days` | numerisch | Tatsächliche Lieferzeit in Tagen |
+| `delivery_days` | numerisch | Lieferzeit in Tagen |
 
-**Wofür geeignet:**
-- Use Case #1 (Histogramm): Verteilung der Lieferzeiten
-- Use Case #3 (Boxplot): Lieferzeit-Vergleich zwischen Carriern
-- Use Case #4 (Violin Plot): Form-Vergleich der Lieferzeit-Verteilungen
-- Use Case #13 (Scatter): Bestellwert vs. Lieferzeit
-- Use Case #19 (Heatmap): Korrelationsmatrix der numerischen Spalten
-- Use Case #24 (Line Chart): Tägliche Bestellvolumen über das Jahr
-- Use Case #26 (Kalender-Heatmap): Bestellungen pro Tag
-- Use Case #27 (Stacked Bar): Carrier-Anteile pro Region
-
-## Lernreihenfolge (empfohlen)
-
-Statt linear durchzugehen, schlage ich folgende Cluster-Reihenfolge vor:
-
-1. **Fundament**: #1 Histogramm, #3 Boxplot, #13 Scatter, #24 Line Chart — das Brot-und-Butter-Set, das in 70% aller EDA-Situationen reicht.
-2. **Verteilungs-Tiefe**: #2 Density, #4 Violin, #7 ECDF, #10 Raincloud — damit verstehst du, was hinter dem Boxplot steckt.
-3. **Beziehungen vertiefen**: #14 LOESS, #15 Hexbin, #16 2D Density, #19 Heatmap, #20 Pair Plot — bivariate und multivariate Sicht.
-4. **Hochdimensional**: #21 Parallel Coords, #22 PCA, #23 t-SNE/UMAP — Brücke zu ML-Datensätzen.
-5. **Storytelling**: #25 Small Multiples, #26 Kalender, #28 Treemap, #29 Sankey, #30 Choropleth — für Präsentationen und LinkedIn-Posts.
+Weitere Datensätze (hochdimensional für Cluster 4, Geo-Aggregat für #30) folgen laut Plan.
 
 ## Lizenz
 
@@ -159,4 +138,4 @@ MIT — frei verwendbar, gerne weitergeben.
 ## Autor
 
 Tobias · ConBrio · 2026
-Begleitet durch das ML-Lernprogramm und die "30 Elegant Graphics"-Übersicht.
+Begleitet durch das ML-Lernprogramm und die „30 Elegant Graphics"-Übersicht.
