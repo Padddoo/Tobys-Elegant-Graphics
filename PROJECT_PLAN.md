@@ -5,7 +5,7 @@
 > ohne Server, ohne Betriebskosten.
 
 **Stand:** 2026-06-10 · **Branch:** `claude/data-viz-learning-env-s46isl`
-**Ziel-URL:** `https://padddoo.github.io/Tobys-Elegant-Graphics/`
+**Hosting:** Vercel (verbunden mit dem GitHub-Repo; Branch-Pushes = Preview-Deployments, `main` = Produktion)
 
 ---
 
@@ -14,7 +14,8 @@
 Plan v1 folgte der README-Spec (Colab-Notebooks). Entscheidung vom 2026-06-10:
 
 - **Die Lernumgebung ist eine statische Web-App** (HTML/CSS/JS + Plotly.js), gehostet auf
-  **GitHub Pages** → eigene URL, lädt sofort, läuft auf jedem Gerät.
+  **Vercel** (Entscheidung 2026-06-10, ersetzt GitHub Pages) → eigene URL, automatisches
+  Deployment bei jedem Push, läuft auf jedem Gerät.
 - **Python-Code wird als kopierbare Snippets gezeigt** (Nice-to-have, nicht ausführbar) —
   das Lernziel „eigene Snippet-Bibliothek" bleibt erhalten, ohne Kernel im Browser.
 - **Kein Build-Step, kein Framework**: Vanilla JS + Plotly.js per CDN. Das hält die Codebasis
@@ -56,7 +57,7 @@ tobys-elegant-graphics/            (Repo-Root)
 │   └── projections.json           ← neu (M4, vorberechnete PCA/t-SNE/UMAP-Koordinaten)
 ├── tools/                         ← Python-Skripte: Datengenerierung & Vorberechnung
 │   └── precompute.py
-└── docs/                          ← DIE WEB-APP (GitHub Pages serviert aus /docs)
+└── docs/                          ← DIE WEB-APP (Vercel serviert aus /docs, s. vercel.json)
     ├── index.html                 ← Start + Lernpfad-Übersicht
     ├── chooser.html               ← Chart-Chooser (Entscheidungsbaum)
     ├── quiz.html                  ← Quiz-Modus über alle Module
@@ -112,8 +113,8 @@ tobys-elegant-graphics/            (Repo-Root)
 - Lernpfad-Startseite mit den 5 Clustern (Module verlinkt, noch als „bald verfügbar")
 - Aufräumen: Notebook-Template entfernen, README auf Web-App-Konzept aktualisieren,
   requirements.txt auf `tools/`-Bedarf reduzieren
-- GitHub Pages aktivieren (Settings → Pages → „main /docs") — *braucht einmalig dich oder
-  Merge-Rechte; bis dahin lokal testbar via `python -m http.server`*
+- Vercel-Deployment einrichten (`vercel.json`: statisch aus `/docs`, kein Build) —
+  lokal weiterhin testbar via `python -m http.server`
 - **Ergebnis: Die App ist unter der eigenen URL erreichbar und ein Modul ist komplett erlebbar
   → Review-Punkt: Design & Modul-Aufbau ok?**
 
@@ -168,7 +169,7 @@ tobys-elegant-graphics/            (Repo-Root)
 
 | Risiko | Wahrsch. | Gegenmaßnahme |
 |--------|----------|---------------|
-| GitHub Pages nicht aktiviert (braucht Repo-Settings) | sicher, einmalig | Früh in M0 anstoßen; bis dahin lokaler Server |
+| Vercel-Projekt-Settings kollidieren mit `vercel.json` (z. B. abweichendes Root Directory) | niedrig | `vercel.json` ist die eine Quelle der Wahrheit; Dashboard-Overrides entfernen |
 | 5.000-Zeilen-CSV (~250 KB) bei jedem Seitenaufruf | niedrig | Einmal laden, im Modul-Wechsel wiederverwenden (SPA-artiger Router); ggf. abgespecktes JSON |
 | Plotly-Lücken (Hexbin, Mosaic, Beeswarm, Kalender) | mittel | Lösungen pro Fall definiert (siehe Tabelle §2); notfalls statisches Bild + Snippet |
 | Scope-Kriechen bei 30 × 7 Sektionen Content | mittel | Content-Config erzwingt einheitlichen, begrenzten Umfang pro Modul |

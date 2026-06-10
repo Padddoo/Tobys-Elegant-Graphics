@@ -3,7 +3,7 @@
 > Eine interaktive Lernumgebung zum Thema **„Graphische Darstellung von Daten"** —
 > 30 Visualisierungs-Patterns zum Anfassen, direkt im Browser.
 
-**🌐 Live:** [padddoo.github.io/Tobys-Elegant-Graphics](https://padddoo.github.io/Tobys-Elegant-Graphics/) *(GitHub Pages: Settings → Pages → Branch `main`, Ordner `/docs`)*
+**🌐 Live:** Gehostet auf **Vercel** — jeder Push deployt automatisch (Branches als Preview, `main` als Produktion). Die URL findest du im Vercel-Dashboard (`https://<projektname>.vercel.app`).
 
 ## Was ist das?
 
@@ -17,7 +17,7 @@ Jede der 30 Visualisierungen ist ein interaktives Lern-Modul mit:
 
 Dazu kommen ein **geführter Lernpfad** (Fortschritt wird im Browser gespeichert), ein **Chart-Chooser** (Entscheidungsbaum zur richtigen Grafik, in Arbeit) und ein übergreifender **Quiz-Modus** (in Arbeit).
 
-Kein Login, kein Backend, kein Build-Step: Vanilla HTML/CSS/JS + [Plotly.js](https://plotly.com/javascript/), gehostet auf GitHub Pages.
+Kein Login, kein Backend, kein Build-Step: Vanilla HTML/CSS/JS + [Plotly.js](https://plotly.com/javascript/), gehostet auf Vercel (`vercel.json` zeigt auf `docs/`).
 
 ## Lernziele
 
@@ -35,7 +35,7 @@ tobys-elegant-graphics/
 ├── data/                    ← Quell-Datensätze (CSV)
 │   └── shipping_orders_2024.csv
 ├── tools/                   ← Python-Skripte: Daten generieren, PCA/LOESS vorberechnen
-└── docs/                    ← DIE WEB-APP (GitHub Pages serviert aus /docs)
+└── docs/                    ← DIE WEB-APP (Vercel serviert aus /docs)
     ├── index.html           ← Start + Lernpfad
     ├── module.html          ← generische Modul-Seite (#01 … #30)
     ├── css/style.css
