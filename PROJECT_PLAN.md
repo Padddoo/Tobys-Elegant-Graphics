@@ -1,167 +1,180 @@
-# Projektplan: Toby's Elegant Graphics
+# Projektplan v2: Toby's Elegant Graphics — Interaktive Lernumgebung
 
-> Umsetzungsplan für die im README spezifizierten **30 Elegant Graphics for Data Analysis** —
-> ein Colab-Notebook pro Use Case, mit Beispiel-Datensätzen, gerenderten Bildern und README-Verlinkung.
+> Eine **webbasierte, voll interaktive Lernumgebung** zum Thema „Graphische Darstellung von Daten",
+> aufgebaut auf den 30 Visualisierungs-Patterns aus dem README — erreichbar unter eigener URL,
+> ohne Server, ohne Betriebskosten.
 
-**Stand:** 2026-06-10 · **Spec:** [README.md](README.md) · **Branch:** `claude/data-viz-learning-env-s46isl`
-
----
-
-## 1. Ziel & Scope (aus der Spec)
-
-Für jeden der 30 Use Cases entsteht:
-
-1. ein **Colab-Notebook** mit kommentiertem Python-Code (läuft eigenständig, lädt Daten von GitHub)
-2. ein **realistischer Datensatz** in `/data/`
-3. ein **gerendertes Beispiel-Bild** in `/images/`
-4. eine **README-Sektion**: Wann nutzen? Was zeigt es? Wo sind die Fallstricke?
-
-**Nicht im Scope** (bewusst, laut Spec): Web-Apps, Frameworks, Server, Build-Pipelines.
-
-**Lernziele** (Erfolgskriterien des Projekts):
-- In 5 Minuten die richtige Visualisierung für einen neuen Datensatz wählen können
-- Trade-offs jeder Grafik kennen
-- Eine Bibliothek wiederverwendbarer Code-Snippets besitzen
+**Stand:** 2026-06-10 · **Branch:** `claude/data-viz-learning-env-s46isl`
+**Ziel-URL:** `https://padddoo.github.io/Tobys-Elegant-Graphics/`
 
 ---
 
-## 2. Spec-Review: Festgestellte Lücken & Entscheidungen
+## 0. Architektur-Entscheidung (ersetzt Plan v1)
 
-Beim Durchgehen der Spec sind folgende Punkte aufgefallen, die der Plan adressiert:
+Plan v1 folgte der README-Spec (Colab-Notebooks). Entscheidung vom 2026-06-10:
 
-| # | Befund | Entscheidung im Plan |
-|---|--------|---------------------|
-| G1 | **Doppelte Struktur**: Alle Dateien liegen sowohl im Repo-Root als auch unter `tobys-elegant-graphics/` | Konsolidierung auf Root-Layout (`data/`, `notebooks/`, `images/` direkt im Repo-Root), Unterordner entfernen → M0 |
-| G2 | **Datensatz-Lücke Hochdimensional**: `shipping_orders_2024.csv` hat nur 2 numerische Spalten — zu wenig für #19 Heatmap, #20 Pair Plot, #21 Parallel Coords, #22 PCA, #23 t-SNE/UMAP | Zweiter Datensatz mit 8–12 numerischen Features (z. B. `product_metrics.csv`: Gewicht, Volumen, Marge, Retourenquote, …) → M4 |
-| G3 | **Datensatz-Lücke Geo**: #30 Choropleth braucht Geo-Bezug; 5 Grobregionen sind zu wenig | Mapping-Tabelle Region → Bundesländer + aggregierte Bestellwerte je Bundesland (`orders_by_bundesland.csv`) → M5 |
-| G4 | **Paket-Risiken**: `ptitprince` (Raincloud) und `joypy` (Ridgeline) sind schwach gepflegt und kollidieren z. T. mit aktuellem seaborn | Fallback einplanen: Raincloud/Ridgeline notfalls manuell mit seaborn/matplotlib bauen; Versionen in requirements pinnen → M2 |
-| G5 | **Colab-Datenladen**: Notebooks brauchen stabile Raw-URLs auf GitHub | Standard-Loader-Zelle im Notebook-Template, URL zeigt auf `main` → M0 |
-| G6 | `.DS_Store` im Repo | In `.gitignore` aufnehmen, Datei entfernen → M0 |
+- **Die Lernumgebung ist eine statische Web-App** (HTML/CSS/JS + Plotly.js), gehostet auf
+  **GitHub Pages** → eigene URL, lädt sofort, läuft auf jedem Gerät.
+- **Python-Code wird als kopierbare Snippets gezeigt** (Nice-to-have, nicht ausführbar) —
+  das Lernziel „eigene Snippet-Bibliothek" bleibt erhalten, ohne Kernel im Browser.
+- **Kein Build-Step, kein Framework**: Vanilla JS + Plotly.js per CDN. Das hält die Codebasis
+  für einen Lernenden les- und wartbar und passt zum Repo-Motto „keine Setup-Dramen".
+- Colab-Notebooks sind **nicht mehr im Scope** (das Template aus M0/v1 wird entfernt).
 
----
+## 1. Was die App kann (Produktsicht)
 
-## 3. Ziel-Struktur des Repos
+Die 30 Use Cases aus dem README bleiben der fachliche Kern. Die App verpackt sie in
+fünf Erlebnis-Bausteine:
+
+| Baustein | Beschreibung | Lernziel aus dem README |
+|----------|--------------|------------------------|
+| **Lernpfad** | Die 5 Cluster (Fundament → Storytelling) als geführter Pfad; Fortschritt pro Modul im `localStorage` | Struktur & Motivation |
+| **Parameter-Labor** | Pro Grafik ein Live-Playground: Slider & Controls (Bins, Bandbreite, Jitter, log-Skala …) verändern die Plotly-Grafik sofort — am echten Shipping-Datensatz | „Trade-offs jeder Grafik kennen" |
+| **Chart-Chooser** | Interaktiver Entscheidungsbaum: „Wie viele Variablen? Welcher Typ? Welche Frage?" → führt zur passenden Grafik | „In 5 Min. die richtige Visualisierung wählen" |
+| **Snippet-Karten** | Pro Grafik das Python-Rezept (matplotlib/seaborn/plotly) mit Copy-Button, minimal + elegante Version | „Bibliothek wiederverwendbarer Snippets" |
+| **Fallstricke & Quiz** | Pro Grafik ein Gut/Schlecht-Vergleich (z. B. abgeschnittene Achse) + Quizfragen mit Sofort-Feedback | Kritisches Sehen |
+
+### Aufbau einer Use-Case-Seite (einheitlich für alle 30)
+
+1. **Die Frage** — welche analytische Frage beantwortet diese Grafik?
+2. **Parameter-Labor** — interaktive Plotly-Grafik mit 2–4 Controls
+3. **Gut vs. Schlecht** — dieselben Daten einmal sauber, einmal irreführend dargestellt, umschaltbar
+4. **Snippet-Karte** — Python-Code zum Kopieren (minimal + elegant)
+5. **Merksatz & Fallstricke** — kompakte Trade-off-Tabelle
+6. **Quiz** — 2–3 Fragen, Antwort-Feedback inline
+7. **Weiter im Pfad** — Navigation zum nächsten Modul, Fortschritts-Haken
+
+## 2. Technische Architektur
 
 ```
 tobys-elegant-graphics/            (Repo-Root)
-├── README.md                      ← Spec + Use-Case-Katalog mit Colab-Badges
-├── PROJECT_PLAN.md                ← Dieser Plan
-├── requirements.txt
-├── .gitignore
+├── README.md                      ← wird in M0 auf Web-App-Konzept aktualisiert
+├── PROJECT_PLAN.md
 ├── data/
 │   ├── shipping_orders_2024.csv   ← vorhanden (5.000 Bestellungen)
 │   ├── product_metrics.csv        ← neu (M4, hochdimensional)
-│   └── orders_by_bundesland.csv   ← neu (M5, Geo)
-├── notebooks/
-│   ├── 01_histogramm.ipynb
-│   ├── 02_density_kde.ipynb
-│   ├── …
-│   └── 30_choropleth.ipynb
-└── images/
-    ├── 01_histogramm.png
-    └── …
+│   └── projections.json           ← neu (M4, vorberechnete PCA/t-SNE/UMAP-Koordinaten)
+├── tools/                         ← Python-Skripte: Datengenerierung & Vorberechnung
+│   └── precompute.py
+└── docs/                          ← DIE WEB-APP (GitHub Pages serviert aus /docs)
+    ├── index.html                 ← Start + Lernpfad-Übersicht
+    ├── chooser.html               ← Chart-Chooser (Entscheidungsbaum)
+    ├── quiz.html                  ← Quiz-Modus über alle Module
+    ├── module.html                ← generische Use-Case-Seite (rendert aus Config)
+    ├── css/style.css              ← Design-System (eine Datei)
+    ├── js/
+    │   ├── app.js                 ← Navigation, Fortschritt (localStorage), Router (#01 …)
+    │   ├── data.js                ← CSV-Laden/Parsen, abgeleitete Aggregate
+    │   ├── labs.js                ← die 30 Parameter-Labore (Plotly-Konfigurationen)
+    │   └── content.js             ← Texte, Snippets, Quizfragen, Fallstricke (alle 30 Module)
+    └── data/ → ../data            ← CSVs für fetch() erreichbar (Kopie/Symlink-Strategie in M0 klären)
 ```
 
----
+**Leitprinzipien:**
+- **Content-getrieben:** Eine generische `module.html` rendert jedes der 30 Module aus einer
+  Config in `content.js`/`labs.js`. Neues Modul = neuer Config-Eintrag, kein neues HTML.
+- **Plotly.js als einzige Chart-Lib** (CDN, ~3.5 MB, wird gecacht). Deckt nativ ab: Histogramm,
+  Box, Violin, Scatter, Line, Heatmap, Contour, 2D-Histogramm, Parallel Coordinates, Sankey,
+  Treemap, Choropleth.
+- **Vorberechnung statt Browser-Rechnen:** PCA/t-SNE/UMAP-Koordinaten, LOESS-Stützpunkte und
+  KDE-Kurven werden einmalig per Python (`tools/`) erzeugt und als JSON ausgeliefert.
+- **Kein Backend, kein Tracking, kein Login.** Fortschritt liegt nur im Browser.
 
-## 4. Notebook-Template (einheitlich für alle 30)
+### Plotly-Abdeckung der 30 Use Cases — Sonderfälle
 
-Jedes Notebook folgt derselben Struktur — das ist der Kern der Wiederverwendbarkeit:
+| Use Case | Lösung im Browser |
+|----------|------------------|
+| #06 Beeswarm | berechnetes Jitter-Layout (kleiner JS-Algorithmus) |
+| #09 Ridgeline | gestapelte, versetzte Dichte-Flächen (vorberechnete KDE) |
+| #10 Raincloud | Kombi aus Half-Violin + Box + Jitter-Punkten |
+| #14 LOESS | Stützpunkte vorberechnet (Python), als Linie gerendert |
+| #15 Hexbin | Plotly `histogram2d` (rechteckig) + Hinweis auf Hex-Variante im Python-Snippet |
+| #18 Mosaic | eigene Rechteck-Geometrie (JS, ~50 Zeilen) |
+| #22/#23 PCA, t-SNE/UMAP | Koordinaten vorberechnet → Scatter |
+| #26 Kalender-Heatmap | Heatmap mit Wochen×Wochentag-Gitter (JS-Datumslogik) |
+| #30 Choropleth | Plotly-Choropleth + GeoJSON Bundesländer (offene Quelle, eingecheckt) |
 
-1. **Titel + „Open in Colab"-Badge**
-2. **Die Frage** — welche analytische Frage beantwortet diese Grafik? (1 Absatz)
-3. **Setup & Daten laden** — Standard-Loader-Zelle (pandas, Raw-URL, `head()`)
-4. **Minimalbeispiel** — die Grafik in ≤ 5 Zeilen („das Copy-Paste-Snippet")
-5. **Elegante Version** — beschriftet, aufgeräumt, präsentationstauglich
-6. **Fallstricke & Trade-offs** — was die Grafik verschweigt, typische Fehler (mit Negativ-Beispiel)
-7. **Varianten** — 1–2 sinnvolle Abwandlungen (z. B. Histogramm: Bins, Dichte-Normierung, log-Skala)
-8. **Übung** — eine offene Aufgabe am Datensatz mit ausklappbarer Lösung
+## 3. Datensätze
 
-**Definition of Done pro Notebook:**
-- [ ] Läuft in frischem Colab von oben nach unten ohne Fehler durch
-- [ ] Lädt Daten ausschließlich über GitHub-Raw-URL (kein lokaler Pfad)
-- [ ] Elegante Version als PNG in `images/` exportiert
-- [ ] README: Zeile in der Use-Case-Tabelle mit Colab-Badge verlinkt
-- [ ] Durcharbeitszeit ≤ 15 Minuten
+- **`shipping_orders_2024.csv`** (vorhanden): trägt ~22 der 30 Module (Verteilung, Gruppen,
+  Beziehungen, Zeitreihen, Komposition, Sankey).
+- **`product_metrics.csv`** (neu in M4): 8–12 numerische Features mit eingebauten Korrelationen
+  und 3–4 Clustern — für Heatmap, Pair Plot, Parallel Coords, PCA, t-SNE/UMAP.
+- **Geo-Aggregat + GeoJSON** (neu in M5): Bestellwerte je Bundesland für die Choropleth-Karte.
+- Browser lädt CSVs per `fetch()`; Parsing mit kleinem eigenem Parser (kein Dependency-Zoo).
 
----
+## 4. Meilensteine
 
-## 5. Meilensteine & Arbeitspakete
+### M0 — App-Durchstich (das wichtigste Arbeitspaket)
+- `docs/`-Grundgerüst: Layout, Navigation, Design-System, CSV-Loader, Fortschritts-Logik
+- **Ein komplettes Modul (#01 Histogramm)** mit allen 7 Sektionen inkl. Parameter-Labor
+  (Slider: Bin-Anzahl, log-Skala, Dichte-Normierung), Gut/Schlecht, Snippet, Quiz
+- Lernpfad-Startseite mit den 5 Clustern (Module verlinkt, noch als „bald verfügbar")
+- Aufräumen: Notebook-Template entfernen, README auf Web-App-Konzept aktualisieren,
+  requirements.txt auf `tools/`-Bedarf reduzieren
+- GitHub Pages aktivieren (Settings → Pages → „main /docs") — *braucht einmalig dich oder
+  Merge-Rechte; bis dahin lokal testbar via `python -m http.server`*
+- **Ergebnis: Die App ist unter der eigenen URL erreichbar und ein Modul ist komplett erlebbar
+  → Review-Punkt: Design & Modul-Aufbau ok?**
 
-Reihenfolge folgt der empfohlenen Lernreihenfolge aus der Spec (Cluster 1–5); die nicht
-geclusterten Use Cases sind thematisch passend einsortiert.
+### M1 — Fundament-Cluster (3 weitere Module)
+- #03 Boxplot · #13 Scatter · #24 Line Chart (gleiches Schema wie #01)
+- Fortschritts-Anzeige im Lernpfad scharf schalten
+- **Ergebnis:** Cluster 1 „Brot und Butter" komplett durchspielbar
 
-### M0 — Fundament & Repo-Hygiene
-- Struktur konsolidieren (G1), `.DS_Store` entfernen, `.gitignore` ergänzen (G6)
-- `notebooks/`- und `images/`-Ordner anlegen
-- Notebook-Template als `00_template.ipynb` festschreiben (inkl. Standard-Loader, G5)
-- requirements.txt: Versionen prüfen/pinnen
-- **Ergebnis:** Sauberes Repo, in dem jedes weitere Notebook nach Schema F entsteht
+### M2 — Chart-Chooser + Verteilungen & Gruppen (10 Module)
+- Chart-Chooser (Entscheidungsbaum, eigenständige Seite)
+- #02 Density · #04 Violin · #05 Strip · #06 Beeswarm · #07 ECDF
+- #08 Grupp. Boxplot · #09 Ridgeline · #10 Raincloud · #11 Dot+CI · #12 Bar Chart
+- **Ergebnis:** Univariate + Gruppen-Perspektive komplett, Chooser nutzbar
 
-### M1 — Brot-und-Butter-Set (4 Notebooks)
-> Spec-Cluster 1 „Fundament" — deckt 70 % aller EDA-Situationen ab
-- #01 Histogramm · #03 Boxplot · #13 Scatter · #24 Line Chart
-- Alle auf `shipping_orders_2024.csv`
-- **Ergebnis:** Erster vollständiger Durchstich Notebook → Bild → README-Badge; Template validiert
-
-### M2 — Verteilungen & Gruppenvergleich (10 Notebooks)
-> Spec-Cluster 2 + Kategorie B
-- #02 Density · #04 Violin · #05 Strip/Jitter · #06 Beeswarm · #07 ECDF
-- #08 Gruppierter Boxplot · #09 Ridgeline · #10 Raincloud · #11 Dot Plot mit CI · #12 Bar Chart
-- Paket-Risiko G4 hier lösen (joypy/ptitprince testen, ggf. manuelle Implementierung)
-- **Ergebnis:** Komplette univariate + Gruppen-Perspektive
-
-### M3 — Beziehungen zwischen Variablen (6 Notebooks)
-> Spec-Cluster 3 (ohne Heatmap/Pair Plot, die brauchen den neuen Datensatz)
-- #14 Scatter + LOESS · #15 Hexbin · #16 2D Density · #17 Bubble · #18 Mosaic
-- #29 Sankey (Region → Carrier → Kategorie fließt gut aus den Shipping-Daten, daher vorgezogen)
+### M3 — Beziehungen (6 Module)
+- #14 LOESS · #15 Hexbin/2D-Hist · #16 2D Density · #17 Bubble · #18 Mosaic · #29 Sankey
+- `tools/precompute.py` für LOESS/KDE-Stützpunkte
 - **Ergebnis:** Bivariate Analyse komplett
 
-### M4 — Hochdimensional (5 Notebooks + neuer Datensatz)
-- `product_metrics.csv` konstruieren (G2): 8–12 numerische Features, eingebaute Korrelationen und Cluster, damit PCA/UMAP etwas zu finden haben
-- #19 Korrelations-Heatmap · #20 Pair Plot · #21 Parallel Coordinates · #22 PCA · #23 t-SNE/UMAP
-- **Ergebnis:** Brücke zu ML-Datensätzen
+### M4 — Hochdimensional (5 Module + neuer Datensatz)
+- `product_metrics.csv` generieren; PCA/t-SNE/UMAP vorberechnen → `projections.json`
+- #19 Heatmap · #20 Pair Plot · #21 Parallel Coords · #22 PCA · #23 t-SNE/UMAP
+- **Ergebnis:** ML-Brücke komplett
 
-### M5 — Zeit, Komposition & Geo (5 Notebooks + Geo-Daten)
-- #25 Small Multiples · #26 Kalender-Heatmap · #27 Stacked Bar (100 %) · #28 Treemap
-- `orders_by_bundesland.csv` + GeoJSON-Quelle klären (G3), dann #30 Choropleth
-- **Ergebnis:** Alle 30 Use Cases abgedeckt
+### M5 — Zeit, Komposition & Geo (5 Module)
+- #25 Small Multiples · #26 Kalender-Heatmap · #27 Stacked Bar · #28 Treemap · #30 Choropleth
+- Bundesländer-GeoJSON + Aggregat-Daten
+- **Ergebnis: alle 30 Module live**
 
-### M6 — Qualitätssicherung & Politur
-- Alle 30 Notebooks einmal frisch in Colab durchlaufen lassen (DoD-Check)
-- README final: alle Badges, Bilder-Galerie, Datensatz-Doku für die 2 neuen CSVs
-- Lizenzdatei (MIT) ergänzen
-- **Ergebnis:** Repo veröffentlichungsreif
+### M6 — Quiz-Modus & Politur
+- Übergreifender Quiz-Modus („Welche Grafik passt zu dieser Frage?" über alle Module)
+- QA: alle Module auf Mobil + Desktop durchklicken, Ladezeiten, tote Links
+- README-Galerie, Lizenzdatei
+- **Ergebnis:** veröffentlichungsreif, LinkedIn-tauglich
 
----
+## 5. Aufwandsschätzung
 
-## 6. Aufwandsschätzung
+| Meilenstein | Umfang | Sessions* |
+|-------------|--------|-----------|
+| M0 | App-Gerüst + Modul #01 + Aufräumen | 1–2 |
+| M1 | 3 Module | 1 |
+| M2 | Chooser + 10 Module | 2–3 |
+| M3 | 6 Module + Precompute | 2 |
+| M4 | 5 Module + Datensatz | 2 |
+| M5 | 5 Module + Geo | 2 |
+| M6 | Quiz-Modus + QA | 1 |
+| **Gesamt** | **App + 30 Module** | **11–13** |
 
-| Meilenstein | Umfang | Geschätzte Sessions* |
-|-------------|--------|---------------------|
-| M0 | Setup | 1 |
-| M1 | 4 Notebooks | 1 |
-| M2 | 10 Notebooks | 2–3 |
-| M3 | 6 Notebooks | 1–2 |
-| M4 | 5 Notebooks + Datensatz | 2 |
-| M5 | 5 Notebooks + Geo-Daten | 2 |
-| M6 | QA + Politur | 1 |
-| **Gesamt** | **30 Notebooks, 3 Datensätze** | **10–12** |
+\* Module sind stark templatisiert (Config statt Code) — der Aufwand pro Modul sinkt nach M0 deutlich.
 
-\* Eine Session ≈ ein fokussierter Arbeitsblock; Notebooks innerhalb eines Meilensteins sind
-stark templatisiert, daher sinkt der Aufwand pro Notebook deutlich nach M1.
+## 6. Risiken
 
-## 7. Risiken
+| Risiko | Wahrsch. | Gegenmaßnahme |
+|--------|----------|---------------|
+| GitHub Pages nicht aktiviert (braucht Repo-Settings) | sicher, einmalig | Früh in M0 anstoßen; bis dahin lokaler Server |
+| 5.000-Zeilen-CSV (~250 KB) bei jedem Seitenaufruf | niedrig | Einmal laden, im Modul-Wechsel wiederverwenden (SPA-artiger Router); ggf. abgespecktes JSON |
+| Plotly-Lücken (Hexbin, Mosaic, Beeswarm, Kalender) | mittel | Lösungen pro Fall definiert (siehe Tabelle §2); notfalls statisches Bild + Snippet |
+| Scope-Kriechen bei 30 × 7 Sektionen Content | mittel | Content-Config erzwingt einheitlichen, begrenzten Umfang pro Modul |
 
-| Risiko | Wahrscheinlichkeit | Gegenmaßnahme |
-|--------|-------------------|---------------|
-| `ptitprince`/`joypy` inkompatibel mit aktuellem Colab-Stack | mittel | Manuelle seaborn/matplotlib-Implementierung als Fallback (M2) |
-| `umap-learn`-Installation in Colab langsam | niedrig | Install-Zelle mit Hinweis, t-SNE als Sofort-Alternative im selben Notebook |
-| GeoJSON-Quelle für Bundesländer (Lizenz/Stabilität) | mittel | Etablierte offene Quelle wählen und Kopie in `data/` einchecken |
-| Synthetische Datensätze wirken „zu glatt" | niedrig | Wie beim Shipping-Datensatz: Schiefe, Ausreißer, Saisonalität bewusst einbauen |
+## 7. Arbeitsweise
 
-## 8. Arbeitsweise
-
-- Entwicklung auf Branch `claude/data-viz-learning-env-s46isl`, ein Commit pro abgeschlossenem Arbeitspaket
-- Jeder Meilenstein endet mit lauffähigem Zwischenstand (keine halbfertigen Notebooks auf dem Branch)
-- Review-Punkte: nach M0 (Struktur ok?), nach M1 (Template ok?) — danach ist der Rest Fließbandarbeit
+- Entwicklung auf `claude/data-viz-learning-env-s46isl`, ein Commit pro Arbeitspaket
+- Jeder Meilenstein endet mit lauffähigem Stand (keine halbfertigen Module im Pfad sichtbar)
+- **Review-Punkte:** nach M0 (Design + Modul-Aufbau), nach M2 (Chooser-Logik) — Rest ist Fließband
