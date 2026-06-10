@@ -66,9 +66,9 @@ Status: ✅ verfügbar · 🔒 in Arbeit (Reihenfolge laut [PROJECT_PLAN.md](PRO
 | # | Grafik | Frage | |
 |---|--------|-------|---|
 | 01 | Histogramm | Wie ist eine Variable verteilt? | ✅ |
-| 03 | Boxplot | Median, Quartile, Ausreißer auf einen Blick | 🔒 |
-| 13 | Scatter Plot | Wie hängen zwei Variablen zusammen? | 🔒 |
-| 24 | Line Chart | Wie entwickelt sich eine Größe über Zeit? | 🔒 |
+| 03 | Boxplot | Median, Quartile, Ausreißer auf einen Blick | ✅ |
+| 13 | Scatter Plot | Wie hängen zwei Variablen zusammen? | ✅ |
+| 24 | Line Chart | Wie entwickelt sich eine Größe über Zeit? | ✅ |
 
 ### Cluster 2 · Verteilungen & Gruppen
 | # | Grafik | Frage |
